@@ -176,6 +176,7 @@ function fieldgroup_edit_group_submit($form_id, &$form_values, $content_type, $g
              "WHERE type_name = '%s' AND group_name = '%s'", 
              $form_values['label'], serialize($form_values['settings']), $form_values['description'], $form_values['weight'], $content_type, $group_name);
   }
+  cache_clear_all('fieldgroup_data');
   return 'admin/node/types/'. $content_type .'/groups';
 }
 
@@ -199,6 +200,7 @@ function fieldgroup_remove_group($content_type, $group_name) {
 function fieldgroup_remove_group_submit($form_id, &$form_values, $content_type, $group_name) {
   db_query("DELETE FROM {node_group} WHERE  type_name = '%s' AND group_name = '%s'", $content_type, $group_name);
   db_query("DELETE FROM {node_group_fields} WHERE  type_name = '%s' AND group_name = '%s'", $content_type, $group_name);
+  cache_clear_all('fieldgroup_data');
 
   drupal_set_message('The group has been removed.');
   return 'admin/node/types/'. $content_type .'/groups';  
@@ -214,27 +216,35 @@ function fieldgroup_groups($content_type, $sorted = FALSE) {
   static $groups = array();
   static $groups_sorted = array();
 
+  if (empty($groups)) {
+    if ($cached = cache_get('fieldgroup_data')) {
+      $data = unserialize($cached->data);
+      $groups = &$data['groups'];
+      $groups_sorted = &$data['groups_sorted'];
+    }
+    else {
+      $result = db_query("SELECT g.* FROM {node_group} g ORDER BY g.weight, g.group_name");
+	  	
+		  while ($group = db_fetch_array($result)) {
+		    $group['settings'] = unserialize($group['settings']);
+		    $group['fields'] = array();
+		    $groups[$group['type_name']][$group['group_name']] = $group;
+		    $groups_sorted[$group['type_name']][] = &$groups[$group['type_name']][$group['group_name']];
+		  }
+		  //load fields
+		  $result = db_query("SELECT fi.*, g.group_name FROM {node_group} g ".
+		                     "JOIN {node_group_fields} f ON f.type_name = g.type_name AND f.group_name = g.group_name ".
+		                     "JOIN {node_field_instance} fi USING(field_name, type_name) ".
+		                     "WHERE g.type_name = '%s' ORDER BY fi.weight", $content_type);
+		  while ($field = db_fetch_array($result)) {
+		    $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
+		  }
+		  cache_set('fieldgroup_data', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)), CACHE_PERMANENT);
+    }
+  }
+  
   if (!$groups[$content_type]) {
-  	$result = db_query("SELECT g.* FROM {node_group} g ".
-                       "WHERE g.type_name = '%s' ORDER BY g.weight, g.group_name", $content_type);
-
-  	$groups[$content_type] = array();
-  	$groups_sorted[$content_type] = array();
-  	
-	  while ($group = db_fetch_array($result)) {
-	    $group['settings'] = unserialize($group['settings']);
-	    $group['fields'] = array();
-	    $groups[$content_type][$group['group_name']] = $group;
-	    $groups_sorted[$content_type][] = &$groups[$content_type][$group['group_name']];
-	  }
-	  //load fields
-	  $result = db_query("SELECT fi.*, g.group_name FROM {node_group} g ".
-	                     "JOIN {node_group_fields} f ON f.type_name = g.type_name AND f.group_name = g.group_name ".
-	                     "JOIN {node_field_instance} fi USING(field_name, type_name) ".
-	                     "WHERE g.type_name = '%s' ORDER BY fi.weight", $content_type);
-	  while ($field = db_fetch_array($result)) {
-	    $groups[$content_type][$field['group_name']]['fields'][$field['field_name']] = $field;
-	  }
+    return array();
   }
   return $sorted ? $groups_sorted[$content_type] : $groups[$content_type];
 }
@@ -260,7 +270,7 @@ function _fieldgroup_field_get_group($content_type, $field_name) {
 function fieldgroup_form_alter($form_id, &$form) {
   
   if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id &&
-      $type = content_types($form['type']['#value'])) {
+      node_get_base($form['#node']) == 'content') {
 
     foreach (fieldgroup_groups($form['type']['#value']) as $group_name => $group) {
       $form[$group_name] = array(
@@ -306,5 +316,6 @@ function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default)
     else {
       db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", arg(3), arg(5));      
     }
+    cache_clear_all('fieldgroup_data');
   }
 }
