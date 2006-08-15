@@ -58,8 +58,8 @@ function fieldgroup_menu($may_cache) {
 		        'callback' => 'fieldgroup_remove_group',
 		        'access' => user_access('administer content types'),
 		        'callback arguments' => array(arg(3), arg(5)),
-		        'type' => MENU_CALLBACK_ITEM,
-		        );
+	          'type' => MENU_CALLBACK_ITEM,
+            );
         }
       }
     }
@@ -95,18 +95,18 @@ function fieldgroup_edit_group($content_type, $group_name) {
   if ($group_name == 'add_group' && arg(6) != 'edit') {
     //adding a new one
     $group = array();
-	  $form['submit'] = array(
-	    '#type' => 'submit',
-	    '#value' => t('Add'),
-	    '#weight' => 10,
-	  );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add'),
+      '#weight' => 10,
+    );
   }
   else if ($group) {
-	  $form['submit'] = array(
-	    '#type' => 'submit',
-	    '#value' => t('Save'),
-	    '#weight' => 10,
-	  );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+      '#weight' => 10,
+    );
   }
   else {
     drupal_not_found();
@@ -224,22 +224,22 @@ function fieldgroup_groups($content_type, $sorted = FALSE) {
     }
     else {
       $result = db_query("SELECT g.* FROM {node_group} g ORDER BY g.weight, g.group_name");
-	  	
-		  while ($group = db_fetch_array($result)) {
-		    $group['settings'] = unserialize($group['settings']);
-		    $group['fields'] = array();
-		    $groups[$group['type_name']][$group['group_name']] = $group;
-		    $groups_sorted[$group['type_name']][] = &$groups[$group['type_name']][$group['group_name']];
-		  }
-		  //load fields
-		  $result = db_query("SELECT fi.*, g.group_name FROM {node_group} g ".
-		                     "JOIN {node_group_fields} f USING(type_name, group_name) ".
-		                     "JOIN {node_field_instance} fi USING(field_name, type_name) ".
-		                     "WHERE g.type_name = '%s' ORDER BY fi.weight", $content_type);
-		  while ($field = db_fetch_array($result)) {
-		    $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
-		  }
-		  cache_set('fieldgroup_data', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)), CACHE_PERMANENT);
+      
+      while ($group = db_fetch_array($result)) {
+        $group['settings'] = unserialize($group['settings']);
+        $group['fields'] = array();
+        $groups[$group['type_name']][$group['group_name']] = $group;
+        $groups_sorted[$group['type_name']][] = &$groups[$group['type_name']][$group['group_name']];
+      }
+      //load fields
+      $result = db_query("SELECT fi.*, g.group_name FROM {node_group} g ".
+                         "JOIN {node_group_fields} f USING(type_name, group_name) ".
+                         "JOIN {node_field_instance} fi USING(field_name, type_name) ".
+                         "WHERE g.type_name = '%s' ORDER BY fi.weight", $content_type);
+      while ($field = db_fetch_array($result)) {
+        $groups[$field['type_name']][$field['group_name']]['fields'][$field['field_name']] = $field;
+      }
+      cache_set('fieldgroup_data', serialize(array('groups' => $groups, 'groups_sorted' => $groups_sorted)), CACHE_PERMANENT);
     }
   }
   
@@ -289,7 +289,7 @@ function fieldgroup_form_alter($form_id, &$form) {
   }
   else if ($form_id == '_content_admin_field') {
     $form['widget']['group'] = array(
-			'#type' => 'select',
+      '#type' => 'select',
       '#title' => t('Display in group'),
       '#options' => _fieldgroup_groups_label(arg(3)),
       '#default_value' => _fieldgroup_field_get_group(arg(3), arg(5)),
