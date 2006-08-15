@@ -19,8 +19,9 @@ Read the installation instruction.
 
 Installation 
 ------------
- * Patch CCK with the patch from http://drupal.org/node/78560
+ * Verify that your CCK modules are up to date.
  * Copy the module to your modules directory and activate it.
 
 
-Dependency: CCK (Content Construction Kit)
+Dependency: 
+CCK (Content Construction Kit) version from 15.08.06 or later
