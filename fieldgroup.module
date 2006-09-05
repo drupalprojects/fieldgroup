@@ -282,8 +282,14 @@ function fieldgroup_form_alter($form_id, &$form) {
         '#weight' => $group['weight'],
       );
       foreach ($group['fields'] as $field_name => $field) {
-        $form[$group_name][$field_name] = $form[$field_name];
-        unset($form[$field_name]);
+        if (isset($form[$field_name])) {
+          $form[$group_name][$field_name] = $form[$field_name];
+          unset($form[$field_name]);
+        }
+      }
+      if (!empty($group['fields']) && !element_children($form[$group_name])) {
+        //hide the fieldgroup, because the fields are hidden too
+        unset($form[$group_name]);
       }
     }
   }
