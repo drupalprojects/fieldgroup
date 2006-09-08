@@ -23,19 +23,19 @@ function fieldgroup_install() {
       break;
     case 'pgsql':
       db_query("CREATE TABLE {node_group} (
-                `type_name` varchar(32) NOT NULL default '',
-                `group_name` varchar(32) NOT NULL default '',
-                `label` varchar(255) NOT NULL default '',
-                `settings` varchar(255) NOT NULL default '',
-                `description` text NOT NULL,
-                `weight` smallint NOT NULL
-                 PRIMARY KEY(`type_name`, `group_name`)
+                type_name varchar(32) NOT NULL default '',
+                group_name varchar(32) NOT NULL default '',
+                label varchar(255) NOT NULL default '',
+                settings varchar(255) NOT NULL default '',
+                description text NOT NULL,
+                weight smallint NOT NULL,
+                PRIMARY KEY(type_name, group_name)
       )");
       db_query("CREATE TABLE {node_group_fields} (
-                `type_name` varchar(32) NOT NULL default '',
-                `group_name` varchar(32) NOT NULL default '',
-                `field_name` varchar(32) NOT NULL default '',
-                 PRIMARY KEY(`type_name`, `group_name`, `field_name`)
+                type_name varchar(32) NOT NULL default '',
+                group_name varchar(32) NOT NULL default '',
+                field_name varchar(32) NOT NULL default '',
+                PRIMARY KEY(type_name, group_name, field_name)
       )");
     break;
   }
