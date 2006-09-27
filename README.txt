@@ -20,7 +20,7 @@ Read the installation instruction.
 Installation 
 ------------
  * Verify that your CCK modules are up to date.
- * Copy the module to your modules directory and activate it.
+ * Copy the fieldgroup's directory to your modules directory and activate the module.
 
 
 Dependency: 
