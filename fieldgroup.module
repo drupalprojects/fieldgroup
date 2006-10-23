@@ -325,3 +325,17 @@ function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default)
     cache_clear_all('fieldgroup_data');
   }
 }
+
+/*
+ * Gets the group name for a field
+ * If the field isn't in a group, FALSE will be returned.
+ * @return The name of the group, or FALSE.
+ */
+function fieldgroup_get_group($content_type, $field_name) {
+  foreach (fieldgroup_groups($content_type) as $group_name => $group) {
+    if (in_array($field_name, array_keys($group['fields']))) {
+      return $group_name;
+    }
+  }
+  return FALSE;
+}
