@@ -306,9 +306,6 @@ function fieldgroup_form_alter($form_id, &$form) {
     $form['widget']['description']['#weight'] = 7;
     $form['#submit']['fieldgroup_content_admin_form_submit'] = array($form['widget']['group']['#default_value']);
   }
-  else if ($form_id == '_content_admin_field_remove') {
-    $form['#submit']['fieldgroup_content_admin_remove_submit'] = array();    
-  }
   else if ($form_id == '_content_admin_field_remove' || $form_id == '_content_admin_type_delete') {
     $form['#submit']['fieldgroup_content_admin_remove_submit'] = array();    
   }

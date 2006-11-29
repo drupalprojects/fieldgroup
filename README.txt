@@ -14,8 +14,6 @@ Field groups can be set to be collapsible and can have descriptions.
 The presentation of a node isn't touched. The fields are still ordered
 by their weights without caring about their field groups.
 
-NOTE: You have to patch CCK, or this module won't work correctly.
-Read the installation instruction.
 
 Installation 
 ------------
