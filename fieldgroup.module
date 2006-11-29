@@ -308,10 +308,7 @@ function fieldgroup_form_alter($form_id, &$form) {
     $form['#submit']['fieldgroup_content_admin_form_submit'] = array($form['widget']['group']['#default_value']);
   }
   else if ($form_id == '_content_admin_field_remove') {
-    $form['#submit']['fieldgroup_content_admin_remove_submit'] = array();    
-  }
-  else if ($form_id == '_content_admin_field_remove' || $form_id == '_content_admin_type_delete') {
-    $form['#submit']['fieldgroup_content_admin_remove_submit'] = array();    
+    $form['#submit']['fieldgroup_content_admin_field_remove_submit'] = array();    
   }
 }
 
@@ -333,16 +330,8 @@ function fieldgroup_content_admin_form_submit($form_id, &$form_values, $default)
   }
 }
 
-function fieldgroup_content_admin_remove_submit($form_id, &$form_values) {
-  if ($form_values['field_name']) {
-      //a field has been removed
-      db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
-  }
-  else {
-    //the whole content-type has been deleted
-    db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s'", $form_values['type_name']);
-    db_query("DELETE FROM {node_group} WHERE type_name = '%s'", $form_values['type_name']);
-  }
+function fieldgroup_content_admin_field_remove_submit($form_id, &$form_values) {
+  db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s' AND field_name = '%s'", $form_values['type_name'], $form_values['field_name']);
 }
 
 
@@ -358,4 +347,21 @@ function fieldgroup_get_group($content_type, $field_name) {
     }
   }
   return FALSE;
+}
+
+/**
+ *  Implementation of hook_node_type()
+ *  React to change in node types
+ */
+function fieldgroup_node_type($op, $info) {
+  if ($op == 'update' && $info->type != $info->old_type) {
+    // update the tables
+    db_query("UPDATE {node_group} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
+    db_query("UPDATE {node_group_fields} SET type_name='%s' WHERE type_name='%s'", array($info->type, $info->old_type));
+    cache_clear_all('fieldgroup_data', 'cache');
+  }
+  else if ($op == 'delete') {
+    db_query("DELETE FROM {node_group_fields} WHERE type_name = '%s'", $info->type);
+    db_query("DELETE FROM {node_group} WHERE type_name = '%s'", $info->type);
+  }
 }
