@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function fieldgroup_install() {
   switch ($GLOBALS['db_type']) {
