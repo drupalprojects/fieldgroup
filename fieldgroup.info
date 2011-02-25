@@ -1,4 +1,3 @@
-; $Id$
 name = Fieldgroup
 description = Create field groups for CCK fields.
 dependencies = content
